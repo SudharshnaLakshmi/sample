@@ -12,11 +12,8 @@ pipeline {
             steps {
                 script {
                     def iisWebDir = "C:\\inetpub\\wwwroot\\samplewebsite"
-                    
-                    // Remove all content in the IIS web directory
+            
                     bat "powershell Remove-Item -Recurse -Force ${iisWebDir}\\*"
-                    
-                    // Copy the repository files to the IIS web directory
                     bat "xcopy /s /y /i \"${WORKSPACE}\\*\" \"${iisWebDir}\""
                 }
             }

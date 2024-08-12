@@ -9,7 +9,7 @@ terraform {
 
 provider "local" {}
 
-# Provisioning a Windows VM (Assuming you are using an existing Windows VM)
+
 resource "local_file" "install_iis" {
   content = <<-EOF
   Install-WindowsFeature -name Web-Server -IncludeManagementTools
@@ -26,7 +26,7 @@ resource "null_resource" "run_install_iis" {
   }
 }
 
-# Start IIS Server
+
 resource "null_resource" "start_iis" {
   provisioner "local-exec" {
     command = "iisreset /start"
