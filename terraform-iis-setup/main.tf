@@ -9,27 +9,32 @@ terraform {
 
 provider "local" {}
 
-
-resource "local_file" "install_iis" {
+# Create PowerShell script to install and start IIS
+resource "local_file" "install_and_start_iis" {
   content = <<-EOF
-  Install-WindowsFeature -name Web-Server -IncludeManagementTools
+    # Check if IIS is installed
+    if (-not (Get-WindowsFeature -Name Web-Server).Installed) {
+        # Install IIS and include management tools
+        Install-WindowsFeature -Name Web-Server -IncludeManagementTools
+        Write-Host 'IIS Installed Successfully!'
+    } else {
+        Write-Host 'IIS is already installed.'
+    }
+
+    # Start IIS service
+    iisreset /start
+    Write-Host 'IIS Server Started Successfully!'
   EOF
-  filename = "install_iis.ps1"
+  filename = "install_and_start_iis.ps1"
 }
 
-resource "null_resource" "run_install_iis" {
+# Run the PowerShell script to install and start IIS
+resource "null_resource" "run_iis_script" {
   provisioner "local-exec" {
-    command = "powershell.exe -ExecutionPolicy Bypass -File install_iis.ps1"
-  }
-  triggers = {
-    always_run = "${timestamp()}"
+    command = "powershell -ExecutionPolicy Bypass -File ${local_file.install_and_start_iis.filename}"
   }
 }
 
-
-resource "null_resource" "start_iis" {
-  provisioner "local-exec" {
-    command = "iisreset /start"
-  }
-  depends_on = [null_resource.run_install_iis]
+output "iis_status" {
+  value = "Checked IIS installation status and started IIS if it was not already installed."
 }
